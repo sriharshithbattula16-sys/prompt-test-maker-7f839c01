@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { GraduationCap, Eye, EyeOff, Loader2, UserPlus } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, Loader2, UserPlus, AtSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 const Signup = () => {
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,9 +23,12 @@ const Signup = () => {
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!name.trim()) errs.name = 'Name is required';
-    if (!email.trim()) errs.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Invalid email format';
+    if (!name.trim()) errs.name = 'Full name is required';
+    if (!username.trim()) errs.username = 'Username is required';
+    else if (username.length < 3) errs.username = 'Username must be at least 3 characters';
+    else if (!/^[a-zA-Z0-9_.-]+$/.test(username)) errs.username = 'Only letters, numbers, dots, hyphens & underscores';
+    if (!email.trim()) errs.email = 'Gmail address is required';
+    else if (!/^[^\s@]+@gmail\.com$/i.test(email)) errs.email = 'Please use a valid Gmail address (e.g. you@gmail.com)';
     if (!password) errs.password = 'Password is required';
     else if (password.length < 6) errs.password = 'Password must be at least 6 characters';
     if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match';
@@ -37,8 +41,8 @@ const Signup = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      await signup(name, email, password);
-      toast.success('Account created! Redirecting...');
+      await signup(name, username, email, password);
+      toast.success('Account created! Redirecting…');
       navigate('/student');
     } catch (err: any) {
       toast.error(err.message || 'Signup failed');
@@ -66,19 +70,40 @@ const Signup = () => {
         </div>
 
         <h2 className="text-2xl font-bold text-foreground mb-1">Create your account</h2>
-        <p className="text-muted-foreground mb-8">Student registration — start taking exams today</p>
+        <p className="text-muted-foreground mb-8">Student registration — use your Gmail to get started</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-foreground">Full Name</Label>
             <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="h-11" />
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
+
+          {/* Username */}
           <div className="space-y-1.5">
-            <Label htmlFor="signup-email" className="text-foreground">Email</Label>
-            <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11" />
+            <Label htmlFor="username" className="text-foreground">Username</Label>
+            <div className="relative">
+              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="username"
+                placeholder="johndoe42"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))}
+                className="h-11 pl-9"
+              />
+            </div>
+            {errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
+          </div>
+
+          {/* Gmail */}
+          <div className="space-y-1.5">
+            <Label htmlFor="signup-email" className="text-foreground">Gmail Address</Label>
+            <Input id="signup-email" type="email" placeholder="you@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11" />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
+
+          {/* Password */}
           <div className="space-y-1.5">
             <Label htmlFor="signup-password" className="text-foreground">Password</Label>
             <div className="relative">
@@ -96,6 +121,8 @@ const Signup = () => {
             </div>
             {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
           </div>
+
+          {/* Confirm Password */}
           <div className="space-y-1.5">
             <Label htmlFor="confirm-password" className="text-foreground">Confirm Password</Label>
             <Input
@@ -108,6 +135,7 @@ const Signup = () => {
             />
             {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
           </div>
+
           <Button type="submit" disabled={loading} className="w-full h-11 bg-accent text-accent-foreground hover:bg-accent/90">
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
             Create Account
