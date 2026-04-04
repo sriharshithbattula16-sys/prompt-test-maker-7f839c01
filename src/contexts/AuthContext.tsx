@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -37,7 +38,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const login = useCallback(async (email: string, password: string, role: UserRole) => {
-    // Simulate API call
     await new Promise((r) => setTimeout(r, 800));
     const entry = MOCK_USERS[email];
     if (!entry || entry.password !== password || entry.user.role !== role) {
@@ -47,13 +47,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.setItem('exam_user', JSON.stringify(entry.user));
   }, []);
 
+  const signup = useCallback(async (name: string, email: string, password: string) => {
+    await new Promise((r) => setTimeout(r, 1000));
+    if (MOCK_USERS[email]) {
+      throw new Error('An account with this email already exists');
+    }
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      name,
+      email,
+      role: 'student',
+    };
+    // Register in mock store
+    MOCK_USERS[email] = { password, user: newUser };
+    setUser(newUser);
+    sessionStorage.setItem('exam_user', JSON.stringify(newUser));
+  }, []);
+
   const logout = useCallback(() => {
     setUser(null);
     sessionStorage.removeItem('exam_user');
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
