@@ -30,7 +30,7 @@ export async function loginUser(email: string, password: string, role: string) {
   return { token: 'mock-jwt-token', role };
 }
 
-export async function signupUser(name: string, email: string, password: string) {
+export async function signupUser(name: string, username: string, email: string, password: string) {
   await new Promise((r) => setTimeout(r, 1000));
-  return { id: crypto.randomUUID(), name, email, role: 'student' as const };
+  return { id: crypto.randomUUID(), name, username, email, role: 'student' as const };
 }

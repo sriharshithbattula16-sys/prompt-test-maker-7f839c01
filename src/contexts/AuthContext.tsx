@@ -5,6 +5,7 @@ export type UserRole = 'faculty' | 'student';
 export interface User {
   id: string;
   name: string;
+  username: string;
   email: string;
   role: UserRole;
 }
@@ -13,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -23,11 +24,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
   'faculty@exam.com': {
     password: 'faculty123',
-    user: { id: '1', name: 'Dr. Sarah Johnson', email: 'faculty@exam.com', role: 'faculty' },
+    user: { id: '1', name: 'Dr. Sarah Johnson', username: 'dr.sarah', email: 'faculty@exam.com', role: 'faculty' },
   },
   'student@exam.com': {
     password: 'student123',
-    user: { id: '2', name: 'Alex Chen', email: 'student@exam.com', role: 'student' },
+    user: { id: '2', name: 'Alex Chen', username: 'alexchen', email: 'student@exam.com', role: 'student' },
   },
 };
 
@@ -47,18 +48,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.setItem('exam_user', JSON.stringify(entry.user));
   }, []);
 
-  const signup = useCallback(async (name: string, email: string, password: string) => {
+  const signup = useCallback(async (name: string, username: string, email: string, password: string) => {
     await new Promise((r) => setTimeout(r, 1000));
     if (MOCK_USERS[email]) {
       throw new Error('An account with this email already exists');
     }
+    // Check username uniqueness
+    const usernameTaken = Object.values(MOCK_USERS).some(
+      (entry) => entry.user.username.toLowerCase() === username.toLowerCase()
+    );
+    if (usernameTaken) {
+      throw new Error('This username is already taken');
+    }
     const newUser: User = {
       id: crypto.randomUUID(),
       name,
+      username,
       email,
       role: 'student',
     };
-    // Register in mock store
     MOCK_USERS[email] = { password, user: newUser };
     setUser(newUser);
     sessionStorage.setItem('exam_user', JSON.stringify(newUser));

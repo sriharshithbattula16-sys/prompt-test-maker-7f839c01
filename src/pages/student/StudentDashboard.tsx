@@ -55,7 +55,7 @@ const StudentDashboard = () => {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(' ')[0]} 👋</h1>
+        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.username || user?.name?.split(' ')[0]} 👋</h1>
         <p className="text-muted-foreground mt-1">Your exam dashboard at a glance</p>
       </div>
 
