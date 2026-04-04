@@ -48,18 +48,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.setItem('exam_user', JSON.stringify(entry.user));
   }, []);
 
-  const signup = useCallback(async (name: string, email: string, password: string) => {
+  const signup = useCallback(async (name: string, username: string, email: string, password: string) => {
     await new Promise((r) => setTimeout(r, 1000));
     if (MOCK_USERS[email]) {
       throw new Error('An account with this email already exists');
     }
+    // Check username uniqueness
+    const usernameTaken = Object.values(MOCK_USERS).some(
+      (entry) => entry.user.username.toLowerCase() === username.toLowerCase()
+    );
+    if (usernameTaken) {
+      throw new Error('This username is already taken');
+    }
     const newUser: User = {
       id: crypto.randomUUID(),
       name,
+      username,
       email,
       role: 'student',
     };
-    // Register in mock store
     MOCK_USERS[email] = { password, user: newUser };
     setUser(newUser);
     sessionStorage.setItem('exam_user', JSON.stringify(newUser));
