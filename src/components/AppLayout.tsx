@@ -3,8 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
-  FileText,
-  Settings,
   LogOut,
   GraduationCap,
   Sparkles,
@@ -13,6 +11,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const facultyLinks = [
   { to: '/faculty', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -79,6 +78,7 @@ const AppLayout = () => {
               <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
               <p className="text-xs text-sidebar-foreground/50 capitalize">{user?.role}</p>
             </div>
+            <ThemeToggle className="text-sidebar-foreground/70 hover:text-sidebar-foreground" />
           </div>
           <Button
             variant="ghost"
@@ -101,9 +101,12 @@ const AppLayout = () => {
             </div>
             <span className="font-bold text-foreground">ExamAI</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </header>
 
         {/* Mobile nav */}

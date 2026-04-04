@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { CheckCircle, XCircle, MinusCircle } from 'lucide-react';
+import { CheckCircle, XCircle, MinusCircle, Clock, Lightbulb, AlertTriangle } from 'lucide-react';
 
 const COLORS = ['hsl(152, 60%, 40%)', 'hsl(0, 72%, 51%)', 'hsl(215, 15%, 70%)'];
 
@@ -25,6 +25,8 @@ const StudentResults = () => {
   }));
 
   const pct = Math.round((selectedExam.obtainedMarks / selectedExam.totalMarks) * 100);
+  const timeMins = selectedExam.timeTaken ? Math.floor(selectedExam.timeTaken / 60) : null;
+  const timeSecs = selectedExam.timeTaken ? selectedExam.timeTaken % 60 : null;
 
   return (
     <div>
@@ -55,7 +57,7 @@ const StudentResults = () => {
         key={selectedExam.examId}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6"
+        className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6"
       >
         <div className="bg-card rounded-xl border p-4 text-center">
           <p className="text-3xl font-bold text-accent">{pct}%</p>
@@ -73,6 +75,15 @@ const StudentResults = () => {
           <p className="text-3xl font-bold text-success">{Math.round((selectedExam.correct / selectedExam.totalQuestions) * 100)}%</p>
           <p className="text-xs text-muted-foreground mt-1">Accuracy</p>
         </div>
+        {timeMins !== null && (
+          <div className="bg-card rounded-xl border p-4 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <p className="text-2xl font-bold text-card-foreground">{timeMins}:{String(timeSecs).padStart(2, '0')}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Time Taken</p>
+          </div>
+        )}
       </motion.div>
 
       {/* Charts */}
@@ -113,32 +124,60 @@ const StudentResults = () => {
         </div>
       </div>
 
+      {/* AI Feedback for descriptive exams */}
+      {selectedExam.type === 'descriptive' && selectedExam.questionResults && (
+        <div className="bg-accent/5 border border-accent/20 rounded-xl p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="w-5 h-5 text-accent" />
+            <h3 className="font-semibold text-foreground">AI Suggestions</h3>
+          </div>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            {selectedExam.questionResults
+              .filter((qr) => qr.feedback)
+              .map((qr, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">Q{i + 1}:</strong> {qr.feedback}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+
       {/* Question breakdown */}
       {selectedExam.questionResults && (
         <div>
           <h3 className="font-semibold text-foreground mb-4">Question Breakdown</h3>
           <div className="space-y-3">
             {selectedExam.questionResults.map((qr, i) => (
-              <div key={qr.questionId} className="bg-card rounded-xl border p-4">
+              <motion.div
+                key={qr.questionId}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="bg-card rounded-xl border p-4"
+              >
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5">
                     {qr.status === 'correct' && <CheckCircle className="w-5 h-5 text-success" />}
                     {qr.status === 'incorrect' && <XCircle className="w-5 h-5 text-destructive" />}
+                    {qr.status === 'partial' && <AlertTriangle className="w-5 h-5 text-warning" />}
                     {qr.status === 'skipped' && <MinusCircle className="w-5 h-5 text-muted-foreground" />}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-card-foreground">Q{i + 1}. {qr.questionText}</p>
+                    {qr.topic && <p className="text-xs text-accent mt-0.5">Topic: {qr.topic}</p>}
                     <div className="mt-2 space-y-1 text-xs">
                       {qr.yourAnswer && <p className="text-muted-foreground">Your answer: <span className="text-foreground">{qr.yourAnswer}</span></p>}
                       {qr.correctAnswer && qr.status !== 'correct' && (
                         <p className="text-success">Correct answer: {qr.correctAnswer}</p>
                       )}
-                      {qr.feedback && <p className="text-info mt-1">{qr.feedback}</p>}
+                      {qr.feedback && <p className="text-info mt-1 italic">{qr.feedback}</p>}
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-muted-foreground">{qr.obtainedMarks}/{qr.marks}</span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
