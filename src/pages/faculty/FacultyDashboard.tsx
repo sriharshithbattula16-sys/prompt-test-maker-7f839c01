@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Users, Clock, TrendingUp } from 'lucide-react';
+import { FileText, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import StatCard from '@/components/StatCard';
 import { mockExams } from '@/lib/mockData';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,13 @@ const statusColors: Record<string, string> = {
   closed: 'bg-destructive/10 text-destructive',
 };
 
+const recentActivity = [
+  { action: 'Published exam', detail: 'Photosynthesis - Chapter 3', time: '2 hours ago' },
+  { action: 'Student submitted', detail: 'Alex Chen completed Biology exam', time: '3 hours ago' },
+  { action: 'AI evaluation complete', detail: 'Organic Chemistry — 18 scripts graded', time: '5 hours ago' },
+  { action: 'Exam closed', detail: 'Newton\'s Laws of Motion', time: '1 day ago' },
+];
+
 const FacultyDashboard = () => {
   const { user } = useAuth();
   const activeExams = mockExams.filter((e) => e.status === 'active').length;
@@ -19,11 +27,12 @@ const FacultyDashboard = () => {
     mockExams.filter((e) => e.averageScore).reduce((s, e) => s + (e.averageScore || 0), 0) /
       mockExams.filter((e) => e.averageScore).length
   );
+  const pendingEvaluations = 7; // mock
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(' ')[0]}</h1>
+        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(' ')[0]} 👋</h1>
         <p className="text-muted-foreground mt-1">Here's an overview of your examination activity</p>
       </div>
 
@@ -31,47 +40,64 @@ const FacultyDashboard = () => {
         <StatCard title="Total Exams" value={mockExams.length} icon={FileText} color="accent" />
         <StatCard title="Active Exams" value={activeExams} icon={Clock} color="success" />
         <StatCard title="Total Attempts" value={totalAttempts} icon={Users} color="info" />
-        <StatCard title="Avg Score" value={`${avgScore}%`} icon={TrendingUp} color="warning" />
+        <StatCard title="Pending Evaluations" value={pendingEvaluations} icon={AlertCircle} color="warning" />
       </div>
 
-      <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Recent Exams</h2>
-        <div className="bg-card rounded-xl border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/30">
-                  <th className="text-left p-4 font-medium text-muted-foreground">Title</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Subject</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Type</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Attempts</th>
-                  <th className="text-left p-4 font-medium text-muted-foreground">Avg Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockExams.map((exam, i) => (
-                  <motion.tr
-                    key={exam.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="border-b last:border-0 hover:bg-muted/20 transition-colors"
-                  >
-                    <td className="p-4 font-medium text-card-foreground">{exam.title}</td>
-                    <td className="p-4 text-muted-foreground">{exam.subject}</td>
-                    <td className="p-4"><span className="uppercase text-xs font-semibold text-muted-foreground">{exam.type}</span></td>
-                    <td className="p-4">
-                      <Badge variant="secondary" className={statusColors[exam.status]}>
-                        {exam.status}
-                      </Badge>
-                    </td>
-                    <td className="p-4 text-muted-foreground">{exam.attempts}</td>
-                    <td className="p-4 text-muted-foreground">{exam.averageScore ? `${exam.averageScore}%` : '—'}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Exams Table */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Recent Exams</h2>
+          <div className="bg-card rounded-xl border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 font-medium text-muted-foreground">Title</th>
+                    <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
+                    <th className="text-left p-4 font-medium text-muted-foreground">Attempts</th>
+                    <th className="text-left p-4 font-medium text-muted-foreground">Avg</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockExams.map((exam, i) => (
+                    <motion.tr
+                      key={exam.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="border-b last:border-0 hover:bg-muted/20 transition-colors"
+                    >
+                      <td className="p-4 font-medium text-card-foreground">{exam.title}</td>
+                      <td className="p-4">
+                        <Badge variant="secondary" className={statusColors[exam.status]}>{exam.status}</Badge>
+                      </td>
+                      <td className="p-4 text-muted-foreground">{exam.attempts}</td>
+                      <td className="p-4 text-muted-foreground">{exam.averageScore ? `${exam.averageScore}%` : '—'}</td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
+          <div className="space-y-3">
+            {recentActivity.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="bg-card rounded-xl border p-4"
+              >
+                <p className="text-sm font-medium text-card-foreground">{item.action}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.detail}</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">{item.time}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

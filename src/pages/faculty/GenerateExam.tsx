@@ -6,7 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { mockQuestions, Question } from '@/lib/mockData';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import SyllabusUpload from '@/components/SyllabusUpload';
+import EditQuestionDialog from '@/components/EditQuestionDialog';
 
 const GenerateExam = () => {
   const [prompt, setPrompt] = useState('');
@@ -15,28 +17,33 @@ const GenerateExam = () => {
   const [generated, setGenerated] = useState<Question[] | null>(null);
   const [examTitle, setExamTitle] = useState('');
   const [duration, setDuration] = useState('30');
-  const { toast } = useToast();
+  const [editQuestion, setEditQuestion] = useState<Question | null>(null);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
-      toast({ title: 'Please enter a prompt', variant: 'destructive' });
+      toast.error('Please enter a prompt');
       return;
     }
     setLoading(true);
-    // Simulate n8n webhook call
     await new Promise((r) => setTimeout(r, 2500));
     setGenerated(mockQuestions);
     setExamTitle('Photosynthesis - Chapter 3');
     setLoading(false);
-    toast({ title: 'Questions generated successfully!' });
+    toast.success('Questions generated successfully!');
   };
 
   const handleDelete = (id: string) => {
     setGenerated((prev) => prev?.filter((q) => q.id !== id) || null);
+    toast.success('Question removed');
+  };
+
+  const handleSaveEdit = (updated: Question) => {
+    setGenerated((prev) => prev?.map((q) => (q.id === updated.id ? updated : q)) || null);
+    toast.success('Question updated');
   };
 
   const handlePublish = () => {
-    toast({ title: 'Exam published!', description: 'Students can now access this exam.' });
+    toast.success('Exam published! Students can now access this exam.');
     setGenerated(null);
     setPrompt('');
   };
@@ -46,6 +53,12 @@ const GenerateExam = () => {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">Generate Exam</h1>
         <p className="text-muted-foreground mt-1">Describe the exam you want and let AI create it for you</p>
+      </div>
+
+      {/* Syllabus Upload */}
+      <div className="bg-card rounded-xl border p-6 mb-6">
+        <h2 className="text-sm font-semibold text-card-foreground mb-3">Syllabus (Optional)</h2>
+        <SyllabusUpload />
       </div>
 
       {/* Prompt Interface */}
@@ -66,6 +79,13 @@ const GenerateExam = () => {
           ))}
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label className="text-foreground text-sm">Duration (minutes)</Label>
+            <Input value={duration} onChange={(e) => setDuration(e.target.value)} type="number" className="mt-1" />
+          </div>
+        </div>
+
         <div className="relative">
           <Textarea
             placeholder='e.g. "Generate 10 multiple choice questions from Chapter 3 on Photosynthesis, medium difficulty"'
@@ -83,15 +103,6 @@ const GenerateExam = () => {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
-
-        {examType === 'descriptive' && (
-          <div className="mt-4 flex gap-4">
-            <div className="flex-1">
-              <Label className="text-foreground text-sm">Duration (minutes)</Label>
-              <Input value={duration} onChange={(e) => setDuration(e.target.value)} type="number" className="mt-1" />
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Loading */}
@@ -108,6 +119,14 @@ const GenerateExam = () => {
             </div>
             <p className="text-foreground font-medium">Generating questions...</p>
             <p className="text-sm text-muted-foreground">AI is processing your prompt via n8n workflow</p>
+            <div className="w-48 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+              <motion.div
+                className="h-full bg-accent rounded-full"
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 2.5, ease: 'linear' }}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -115,10 +134,7 @@ const GenerateExam = () => {
       {/* Generated Questions */}
       <AnimatePresence>
         {generated && !loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Generated Questions</h2>
@@ -171,15 +187,10 @@ const GenerateExam = () => {
                       )}
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:text-foreground">
+                      <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:text-foreground" onClick={() => setEditQuestion(q)}>
                         <Edit3 className="w-3.5 h-3.5" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-8 h-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDelete(q.id)}
-                      >
+                      <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(q.id)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -190,6 +201,13 @@ const GenerateExam = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <EditQuestionDialog
+        question={editQuestion}
+        open={!!editQuestion}
+        onClose={() => setEditQuestion(null)}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
