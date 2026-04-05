@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+import { FileText, Clock } from 'lucide-react';
 import StatCard from '@/components/StatCard';
 import { mockExams } from '@/lib/mockData';
 import { Badge } from '@/components/ui/badge';
