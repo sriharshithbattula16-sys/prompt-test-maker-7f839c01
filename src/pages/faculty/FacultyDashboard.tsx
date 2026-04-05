@@ -30,11 +30,9 @@ const FacultyDashboard = () => {
         <p className="text-muted-foreground mt-1">Here's an overview of your examination activity</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
         <StatCard title="Total Exams" value={mockExams.length} icon={FileText} color="accent" />
         <StatCard title="Active Exams" value={activeExams} icon={Clock} color="success" />
-        <StatCard title="Total Attempts" value={totalAttempts} icon={Users} color="info" />
-        <StatCard title="Pending Evaluations" value={pendingEvaluations} icon={AlertCircle} color="warning" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
