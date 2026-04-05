@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+import { FileText, Clock } from 'lucide-react';
 import StatCard from '@/components/StatCard';
 import { mockExams } from '@/lib/mockData';
 import { Badge } from '@/components/ui/badge';
@@ -22,12 +22,6 @@ const recentActivity = [
 const FacultyDashboard = () => {
   const { user } = useAuth();
   const activeExams = mockExams.filter((e) => e.status === 'active').length;
-  const totalAttempts = mockExams.reduce((s, e) => s + e.attempts, 0);
-  const avgScore = Math.round(
-    mockExams.filter((e) => e.averageScore).reduce((s, e) => s + (e.averageScore || 0), 0) /
-      mockExams.filter((e) => e.averageScore).length
-  );
-  const pendingEvaluations = 7; // mock
 
   return (
     <div>
@@ -36,11 +30,9 @@ const FacultyDashboard = () => {
         <p className="text-muted-foreground mt-1">Here's an overview of your examination activity</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
         <StatCard title="Total Exams" value={mockExams.length} icon={FileText} color="accent" />
         <StatCard title="Active Exams" value={activeExams} icon={Clock} color="success" />
-        <StatCard title="Total Attempts" value={totalAttempts} icon={Users} color="info" />
-        <StatCard title="Pending Evaluations" value={pendingEvaluations} icon={AlertCircle} color="warning" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
