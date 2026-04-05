@@ -22,12 +22,6 @@ const recentActivity = [
 const FacultyDashboard = () => {
   const { user } = useAuth();
   const activeExams = mockExams.filter((e) => e.status === 'active').length;
-  const totalAttempts = mockExams.reduce((s, e) => s + e.attempts, 0);
-  const avgScore = Math.round(
-    mockExams.filter((e) => e.averageScore).reduce((s, e) => s + (e.averageScore || 0), 0) /
-      mockExams.filter((e) => e.averageScore).length
-  );
-  const pendingEvaluations = 7; // mock
 
   return (
     <div>
