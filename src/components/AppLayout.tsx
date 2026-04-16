@@ -7,8 +7,9 @@ import {
   GraduationCap,
   Sparkles,
   BarChart3,
-  ClipboardList,
   BookOpen,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -16,8 +17,9 @@ import ThemeToggle from '@/components/ThemeToggle';
 const facultyLinks = [
   { to: '/faculty', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/faculty/generate', icon: Sparkles, label: 'Generate Exam' },
-  { to: '/faculty/exams', icon: ClipboardList, label: 'Manage Exams' },
+  { to: '/faculty/syllabus', icon: Upload, label: 'Upload Syllabus' },
   { to: '/faculty/results', icon: BarChart3, label: 'Results' },
+  { to: '/faculty/delete', icon: Trash2, label: 'Delete' },
 ];
 
 const studentLinks = [
