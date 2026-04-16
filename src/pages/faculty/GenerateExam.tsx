@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mockQuestions, Question } from '@/lib/mockData';
 import { toast } from 'sonner';
-import SyllabusUpload from '@/components/SyllabusUpload';
 import EditQuestionDialog from '@/components/EditQuestionDialog';
 
 const GenerateExam = () => {
@@ -17,6 +18,11 @@ const GenerateExam = () => {
   const [generated, setGenerated] = useState<Question[] | null>(null);
   const [examTitle, setExamTitle] = useState('');
   const [duration, setDuration] = useState('30');
+  const [startTime, setStartTime] = useState('09:00');
+  const [numQuestions, setNumQuestions] = useState('10');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [totalMarks, setTotalMarks] = useState('20');
+  const [negativeMarking, setNegativeMarking] = useState(false);
   const [editQuestion, setEditQuestion] = useState<Question | null>(null);
 
   const handleGenerate = async () => {
@@ -55,12 +61,6 @@ const GenerateExam = () => {
         <p className="text-muted-foreground mt-1">Describe the exam you want and let AI create it for you</p>
       </div>
 
-      {/* Syllabus Upload */}
-      <div className="bg-card rounded-xl border p-6 mb-6">
-        <h2 className="text-sm font-semibold text-card-foreground mb-3">Syllabus (Optional)</h2>
-        <SyllabusUpload />
-      </div>
-
       {/* Prompt Interface */}
       <div className="bg-card rounded-xl border p-6 mb-6">
         <div className="flex gap-3 mb-5">
@@ -84,9 +84,45 @@ const GenerateExam = () => {
             <Label className="text-foreground text-sm">Duration (minutes)</Label>
             <Input value={duration} onChange={(e) => setDuration(e.target.value)} type="number" className="mt-1" />
           </div>
+          <div>
+            <Label className="text-foreground text-sm">Exam Start Time</Label>
+            <Input value={startTime} onChange={(e) => setStartTime(e.target.value)} type="time" className="mt-1" />
+          </div>
         </div>
 
-        <div className="relative">
+        {/* Common Settings */}
+        <div className="border-t pt-4 mt-4">
+          <h3 className="text-sm font-semibold text-card-foreground mb-3">Common Settings</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-foreground text-sm">Number of Questions</Label>
+              <Input value={numQuestions} onChange={(e) => setNumQuestions(e.target.value)} type="number" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-foreground text-sm">Difficulty Level</Label>
+              <Select value={difficulty} onValueChange={setDifficulty}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-foreground text-sm">Total Marks</Label>
+              <Input value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} type="number" className="mt-1" />
+            </div>
+            <div className="flex items-center justify-between sm:col-span-1">
+              <Label className="text-foreground text-sm">Negative Marking</Label>
+              <Switch checked={negativeMarking} onCheckedChange={setNegativeMarking} />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative mt-4">
           <Textarea
             placeholder='e.g. "Generate 10 multiple choice questions from Chapter 3 on Photosynthesis, medium difficulty"'
             value={prompt}

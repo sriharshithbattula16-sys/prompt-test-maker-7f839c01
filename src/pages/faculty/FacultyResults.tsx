@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { mockExams, mockStudentPerformances } from '@/lib/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Trophy, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const FacultyResults = () => {
   const evaluated = mockExams.filter((e) => e.averageScore);
@@ -19,6 +20,10 @@ const FacultyResults = () => {
     mockStudentPerformances
       .filter((s) => s.examId === examId)
       .sort((a, b) => b.score - a.score);
+
+  const toggleExpand = (examId: string) => {
+    setExpandedExam(expandedExam === examId ? null : examId);
+  };
 
   return (
     <div>
@@ -57,30 +62,29 @@ const FacultyResults = () => {
         {evaluated.map((exam) => {
           const students = getStudents(exam.id);
           const isExpanded = expandedExam === exam.id;
-          const topPerformer = students[0];
 
           return (
             <motion.div key={exam.id} layout className="bg-card rounded-xl border overflow-hidden">
-              <button
-                onClick={() => setExpandedExam(isExpanded ? null : exam.id)}
-                className="w-full p-5 flex items-center gap-4 text-left hover:bg-muted/20 transition-colors"
-              >
+              <div className="p-5 flex items-center gap-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-card-foreground">{exam.title}</h3>
                   <p className="text-sm text-muted-foreground">{exam.subject} · {exam.attempts} students</p>
                 </div>
-                {topPerformer && (
-                  <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-                    <Trophy className="w-3.5 h-3.5 text-warning" />
-                    <span>{topPerformer.studentName}</span>
-                  </div>
-                )}
                 <div className="text-right mr-2">
                   <p className="text-2xl font-bold text-accent">{exam.averageScore}%</p>
                   <p className="text-xs text-muted-foreground">avg score</p>
                 </div>
-                {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-              </button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => toggleExpand(exam.id)}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  View Result
+                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                </Button>
+              </div>
 
               {isExpanded && students.length > 0 && (
                 <motion.div
@@ -89,16 +93,14 @@ const FacultyResults = () => {
                   className="border-t"
                 >
                   <div className="p-4">
-                    <h4 className="text-sm font-semibold text-card-foreground mb-3 flex items-center gap-2">
-                      <Trophy className="w-4 h-4 text-warning" /> Student Rankings
-                    </h4>
+                    <h4 className="text-sm font-semibold text-card-foreground mb-3">Student Results</h4>
                     <div className="space-y-2">
                       {students.map((s, i) => {
                         const pct = Math.round((s.score / s.totalMarks) * 100);
                         return (
-                          <div key={s.studentId} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20">
+                          <div key={`${s.studentId}-${s.examId}`} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20">
                             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                              i === 0 ? 'bg-warning/20 text-warning' : i === 1 ? 'bg-muted text-muted-foreground' : 'bg-muted/50 text-muted-foreground'
+                              i === 0 ? 'bg-warning/20 text-warning' : 'bg-muted text-muted-foreground'
                             }`}>
                               {i + 1}
                             </span>

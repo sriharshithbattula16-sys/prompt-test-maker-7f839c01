@@ -11,7 +11,8 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
 import GenerateExam from "@/pages/faculty/GenerateExam";
-import ExamManagement from "@/pages/faculty/ExamManagement";
+import UploadSyllabus from "@/pages/faculty/UploadSyllabus";
+import FacultyDelete from "@/pages/faculty/FacultyDelete";
 import FacultyResults from "@/pages/faculty/FacultyResults";
 import StudentDashboard from "@/pages/student/StudentDashboard";
 import StudentExams from "@/pages/student/StudentExams";
@@ -38,7 +39,8 @@ const App = () => (
               <Route path="/faculty" element={<ProtectedRoute allowedRole="faculty"><AppLayout /></ProtectedRoute>}>
                 <Route index element={<FacultyDashboard />} />
                 <Route path="generate" element={<GenerateExam />} />
-                <Route path="exams" element={<ExamManagement />} />
+                <Route path="syllabus" element={<UploadSyllabus />} />
+                <Route path="delete" element={<FacultyDelete />} />
                 <Route path="results" element={<FacultyResults />} />
               </Route>
 
